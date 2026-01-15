@@ -13,12 +13,13 @@ type Config struct {
 	Server  Server  `mapstructure:"server"`
 	Service Service `mapstructure:"service"`
 	Storage Storage `mapstructure:"database"`
-	//Cache   Cache   `mapstructure:"cache"`
+	Cache   Cache   `mapstructure:"cache"`
 }
 
 type Logger struct {
-	Debug  bool   `mapstructure:"debug_mode"`
-	LogDir string `mapstructure:"log_directory"`
+	Debug          bool   `mapstructure:"debug_mode"`
+	LogDir         string `mapstructure:"log_directory"`
+	RequestLogging bool   `mapstructure:"request_logging"`
 }
 
 type Server struct {
@@ -51,15 +52,10 @@ type Storage struct {
 	RecoverLimit    int           `mapstructure:"recover_limit"`
 }
 
-// type Cache struct {
-// 	Host           string        `mapstructure:"host"`
-// 	Port           string        `mapstructure:"port"`
-// 	Password       string        `mapstructure:"password"`
-// 	MaxMemory      string        `mapstructure:"max_memory"`
-// 	Policy         string        `mapstructure:"policy"`
-// 	RetryStrategy  Producer      `mapstructure:"retry_strategy"`
-// 	ExpirationTime time.Duration `mapstructure:"expiration_time"`
-// }
+type Cache struct {
+	Capacity    int `mapstructure:"capacity"`
+	MaxMessages int `mapstructure:"max_messages"`
+}
 
 func Load() (Config, error) {
 

@@ -70,6 +70,11 @@ func (l *Logger) LogError(msg string, err error, args ...any) {
 	slog.Error(msg, args...)
 }
 
+// LogWarn writes a warning-level log message with the provided fields.
+func (l *Logger) LogWarn(msg string, args ...any) {
+	slog.Warn(msg, args...)
+}
+
 // LogInfo logs an informational message.
 func (l *Logger) LogInfo(msg string, args ...any) {
 	slog.Info(msg, args...)

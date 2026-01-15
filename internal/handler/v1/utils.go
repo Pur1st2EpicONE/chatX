@@ -10,8 +10,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-const idKey = "id"
-
 func parseChatID(c *gin.Context) (int, error) {
 	chatID, err := strconv.Atoi(c.Param(idKey))
 	if err != nil || chatID <= 0 {

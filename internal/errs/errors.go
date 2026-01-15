@@ -14,4 +14,5 @@ var (
 	ErrLimitTooSmall  = errors.New("limit cannot be negative")                    // limit cannot be negative
 	ErrLimitTooLarge  = errors.New("number of messages exceeds service limit")    // number of messages exceeds service limit
 	ErrInvalidLimit   = errors.New("invalid limit; must be an integer")           // invalid limit; must be a positive integer
+	ErrCacheMiss      = errors.New("cache miss")                                  // cache miss
 )

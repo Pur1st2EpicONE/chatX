@@ -1,6 +1,7 @@
 package service
 
 import (
+	"chatX/internal/cache"
 	"chatX/internal/config"
 	"chatX/internal/logger"
 	"chatX/internal/models"
@@ -16,6 +17,6 @@ type Service interface {
 	DeleteChat(ctx context.Context, chatID int) error
 }
 
-func NewService(logger logger.Logger, config config.Service, storage repository.Storage) Service {
-	return impl.NewService(logger, config, storage)
+func NewService(logger logger.Logger, config config.Service, cache cache.Cache, storage repository.Storage) Service {
+	return impl.NewService(logger, config, cache, storage)
 }

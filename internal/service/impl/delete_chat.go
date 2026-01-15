@@ -13,5 +13,6 @@ func (s *Service) DeleteChat(ctx context.Context, chatID int) error {
 		}
 		return err
 	}
+	s.cache.Delete(chatID)
 	return nil
 }

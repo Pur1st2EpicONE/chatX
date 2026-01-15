@@ -2,6 +2,7 @@
 logger:
   log_directory:                               # Directory where logs will be stored; if empty, logs are written to stdout
   debug_mode: true                             # Enable debug-level logging
+  request_logging: false
 
 # HTTP server configuration
 server:
@@ -19,15 +20,8 @@ service:
 
 # Cache (Redis) configuration
 cache:
-  host: localhost                              # Redis host
-  port: "6379"                                 # Redis port
-  max_memory: 256mb                            # Maximum memory Redis is allowed to use
-  policy: allkeys-lru                          # Eviction policy when max memory is reached
-  expiration_time: 30s                         # Default TTL for cached entries
-  retry_strategy:
-    attempts: 2                                # Number of retry attempts for cache operations
-    delay: 100ms                               # Initial delay between retries
-    backoff: 2                                 # Backoff multiplier for retry delay
+  capacity: 3
+  max_messages: 2
 
 # Database (PostgreSQL) configuration
 database:

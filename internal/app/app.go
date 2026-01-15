@@ -1,6 +1,7 @@
 package app
 
 import (
+	"chatX/internal/cache"
 	"chatX/internal/config"
 	"chatX/internal/handler"
 	"chatX/internal/logger"
@@ -24,7 +25,7 @@ type App struct {
 	server  server.Server
 	ctx     context.Context
 	cancel  context.CancelFunc
-	//cache   cache.Cache
+	cache   cache.Cache
 	storage repository.Storage
 }
 
@@ -78,8 +79,9 @@ func wireApp(db *gorm.DB, logger logger.Logger, logFile *os.File, config config.
 
 	ctx, cancel := newContext(logger)
 	storge := repository.NewStorage(logger, config.Storage, db)
-	service := service.NewService(logger, config.Service, storge)
-	handler := handler.NewHandler(service)
+	cache := cache.NewCache(logger, config.Cache)
+	service := service.NewService(logger, config.Service, cache, storge)
+	handler := handler.NewHandler(logger, config.Logger.RequestLogging, service)
 	server := server.NewServer(logger, config.Server, handler)
 
 	return &App{
@@ -88,6 +90,7 @@ func wireApp(db *gorm.DB, logger logger.Logger, logFile *os.File, config config.
 		server:  server,
 		ctx:     ctx,
 		cancel:  cancel,
+		cache:   cache,
 		storage: storge,
 	}
 
@@ -123,15 +126,15 @@ func (a *App) Run() {
 
 	<-a.ctx.Done()
 
-	a.Stop()
+	a.stop()
 
 }
 
-func (a *App) Stop() {
+func (a *App) stop() {
 
 	a.server.Shutdown()
 
-	//a.cache.Close()
+	a.cache.Close()
 	a.storage.Close()
 
 	if a.logFile != nil && a.logFile != os.Stdout {

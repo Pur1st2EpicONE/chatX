@@ -3,7 +3,7 @@ package v1
 import "time"
 
 type ChatRequestDTO struct {
-	Title string `json:"title" validate:"required"`
+	Title string `json:"title"`
 }
 
 type ChatResponseDTO struct {
@@ -13,7 +13,7 @@ type ChatResponseDTO struct {
 }
 
 type MessageRequestDTO struct {
-	Text string `json:"text" validate:"required"`
+	Text string `json:"text"`
 }
 
 type MessageResponseDTO struct {

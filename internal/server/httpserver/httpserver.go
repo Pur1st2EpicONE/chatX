@@ -35,7 +35,7 @@ func NewServer(logger logger.Logger, config config.Server, handler http.Handler)
 }
 
 func (s *HttpServer) Run() error {
-	s.logger.LogInfo("server — receiving requests", "layer", "server")
+	s.logger.LogInfo("server — receiving requests", "layer", "server.httpserver")
 	if err := s.srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		return err
 	}
@@ -46,8 +46,8 @@ func (s *HttpServer) Shutdown() {
 	ctx, cancel := context.WithTimeout(context.Background(), s.shutdownTimeout)
 	defer cancel()
 	if err := s.srv.Shutdown(ctx); err != nil {
-		s.logger.LogError("server — failed to shutdown gracefully", err, "layer", "server")
+		s.logger.LogError("server — failed to shutdown gracefully", err, "layer", "server.httpserver")
 	} else {
-		s.logger.LogInfo("server — shutdown complete", "layer", "server")
+		s.logger.LogInfo("server — shutdown complete", "layer", "server.httpserver")
 	}
 }

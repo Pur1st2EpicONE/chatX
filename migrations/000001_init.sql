@@ -2,14 +2,14 @@
 CREATE TABLE chats (
     id          INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     title       TEXT NOT NULL,
-    created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+    created_at  TIMESTAMPTZ NOT NULL
 );
 
 CREATE TABLE messages (
     id          INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     chat_id     INTEGER NOT NULL,
     text        TEXT NOT NULL,
-    created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+    created_at  TIMESTAMPTZ NOT NULL,
     CONSTRAINT  fk_messages_chat FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE
 );
 

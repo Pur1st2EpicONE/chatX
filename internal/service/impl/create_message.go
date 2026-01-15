@@ -28,6 +28,7 @@ func (s *Service) CreateMessage(ctx context.Context, message models.Message) (mo
 		return models.Message{}, err
 	}
 
+	s.cache.Delete(message.ChatID)
 	return message, nil
 
 }

@@ -2,11 +2,7 @@ package postgres
 
 import (
 	"chatX/internal/config"
-	"chatX/internal/errs"
 	"chatX/internal/logger"
-	"chatX/internal/models"
-	"context"
-	"errors"
 
 	"gorm.io/gorm"
 )
@@ -32,46 +28,4 @@ func (s *Storage) Close() {
 			s.logger.LogInfo("postgres — database closed", "layer", "repository.postgres")
 		}
 	}
-}
-
-func (s *Storage) CreateChat(ctx context.Context, chat *models.Chat) error {
-	return s.db.WithContext(ctx).Create(chat).Error
-}
-
-func (s *Storage) CreateMessage(ctx context.Context, message *models.Message) error {
-	return s.db.WithContext(ctx).Create(message).Error
-}
-
-func (s *Storage) GetChat(ctx context.Context, chatID int, limit int) (models.Chat, error) {
-
-	var chat models.Chat
-
-	if err := s.db.WithContext(ctx).Preload("Messages", preload(limit)).First(&chat, chatID).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return models.Chat{}, errs.ErrChatNotFound
-		}
-		return models.Chat{}, err
-	}
-
-	return chat, nil
-
-}
-
-func preload(limit int) func(*gorm.DB) *gorm.DB {
-	return func(db *gorm.DB) *gorm.DB { return db.Order("created_at DESC").Limit(limit) }
-}
-
-func (s *Storage) DeleteChat(ctx context.Context, chatID int) error {
-
-	result := s.db.WithContext(ctx).Delete(&models.Chat{}, chatID)
-	if result.Error != nil {
-		return result.Error
-	}
-
-	if result.RowsAffected == 0 {
-		return errs.ErrChatNotFound
-	}
-
-	return nil
-
 }
