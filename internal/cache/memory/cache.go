@@ -43,9 +43,6 @@ func NewLRUCache(logger logger.Logger, config config.Cache) *LRUCache {
 }
 
 func (c *LRUCache) remove(node *Node) {
-	if node == c.head || node == c.tail {
-		return
-	}
 	delete(c.hm, node.Key)
 	node.Next.Prev = node.Prev
 	node.Prev.Next = node.Next
@@ -62,11 +59,14 @@ func (c *LRUCache) insert(node *Node) {
 }
 
 func (c *LRUCache) Get(key int) (models.Chat, error) {
+
 	if c.config.Capacity <= 0 {
 		return models.Chat{}, errs.ErrCacheMiss
 	}
+
 	c.mu.RLock()
 	defer c.mu.RUnlock()
+
 	if node, ok := c.hm[key]; ok {
 		c.logger.Debug("cache — chat found", "chatID", key, "layer", "cache.memory")
 		c.remove(node)
@@ -74,42 +74,55 @@ func (c *LRUCache) Get(key int) (models.Chat, error) {
 		return node.Val, nil
 	}
 	c.logger.Debug("cache — chat not found", "chatID", key, "layer", "cache.memory")
+
 	return models.Chat{}, errs.ErrCacheMiss
+
 }
 
 func (c *LRUCache) Put(key int, value models.Chat) {
+
 	if c.config.Capacity <= 0 {
 		return
 	}
+
 	c.mu.Lock()
 	defer c.mu.Unlock()
+
 	if len(value.Messages) > c.config.MaxMessages {
 		c.logger.Debug("cache — chat not cached: message limit exceeded", "layer", "cache.memory")
 		return
 	}
+
 	if node, ok := c.hm[key]; ok {
 		c.remove(node)
 	}
+
 	if len(c.hm) == c.config.Capacity {
 		c.logger.Debug("cache — maximum capacity reached", "layer", "cache.memory")
 		lru := c.tail.Prev
 		c.remove(lru)
 		c.logger.Debug("cache — LRU chat deleted", "chatID", lru.Key, "layer", "cache.memory")
 	}
+
 	c.insert(newNode(key, value))
 	c.logger.Debug("cache — chat saved", "chatID", key, "layer", "cache.memory")
+
 }
 
 func (c *LRUCache) Delete(key int) {
+
 	if c.config.Capacity <= 0 {
 		return
 	}
+
 	c.mu.Lock()
 	defer c.mu.Unlock()
+
 	if node, ok := c.hm[key]; ok {
 		c.remove(node)
 		c.logger.Debug("cache — chat deleted", "chatID", key, "layer", "cache.memory")
 	}
+
 }
 
 func (c *LRUCache) Close() {

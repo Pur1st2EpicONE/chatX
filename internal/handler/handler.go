@@ -14,8 +14,8 @@ import (
 func NewHandler(logger logger.Logger, requestLogging bool, service service.Service) http.Handler {
 
 	handler := gin.New()
-
 	handler.Use(gin.Recovery())
+
 	if requestLogging {
 		handler.Use(middleware(logger))
 	}

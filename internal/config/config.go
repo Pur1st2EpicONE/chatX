@@ -5,15 +5,16 @@ import (
 	"os"
 	"time"
 
-	wbf "github.com/wb-go/wbf/config"
+	"github.com/joho/godotenv"
+	"github.com/spf13/viper"
 )
 
 type Config struct {
 	Logger  Logger  `mapstructure:"logger"`
 	Server  Server  `mapstructure:"server"`
 	Service Service `mapstructure:"service"`
-	Storage Storage `mapstructure:"database"`
 	Cache   Cache   `mapstructure:"cache"`
+	Storage Storage `mapstructure:"database"`
 }
 
 type Logger struct {
@@ -59,33 +60,81 @@ type Cache struct {
 
 func Load() (Config, error) {
 
-	cfg := wbf.New()
+	viper.AddConfigPath(".")
+	viper.SetConfigName("config")
 
-	if err := cfg.LoadEnvFiles(".env"); err != nil {
-		return Config{}, err
+	if err := viper.ReadInConfig(); err != nil {
+		return Config{}, fmt.Errorf("viper: %v", err)
 	}
 
-	if err := cfg.LoadConfigFiles("./config.yaml"); err != nil {
-		return Config{}, err
+	if err := godotenv.Load(".env"); err != nil {
+		return Config{}, fmt.Errorf("godotenv: %v", err)
 	}
 
-	var conf Config
-
-	if err := cfg.Unmarshal(&conf); err != nil {
-		return Config{}, fmt.Errorf("unmarshal config: %w", err)
+	config := Config{
+		Logger:  loggerConfig(),
+		Server:  serverConfig(),
+		Service: serviceConfig(),
+		Cache:   cacheConfig(),
+		Storage: storageConfig(),
 	}
 
-	loadEnvs(&conf)
+	loadEnvs(&config)
 
-	return conf, nil
+	return config, nil
 
 }
 
-func loadEnvs(conf *Config) {
+func loggerConfig() Logger {
+	return Logger{
+		Debug:          viper.GetBool("logger.debug_mode"),
+		LogDir:         viper.GetString("logger.log_directory"),
+		RequestLogging: viper.GetBool("logger.request_logging"),
+	}
+}
 
+func serverConfig() Server {
+	return Server{
+		Port:            viper.GetString("server.port"),
+		ReadTimeout:     viper.GetDuration("server.read_timeout"),
+		WriteTimeout:    viper.GetDuration("server.write_timeout"),
+		MaxHeaderBytes:  viper.GetInt("server.max_header_bytes"),
+		ShutdownTimeout: viper.GetDuration("server.shutdown_timeout"),
+	}
+}
+
+func serviceConfig() Service {
+	return Service{
+		MaxMessageLength: viper.GetInt("service.max_message_length"),
+		MaxTitleLength:   viper.GetInt("service.max_title_length"),
+		GetLimitMax:      viper.GetInt("service.get_limit_max"),
+		GetLimitDefault:  viper.GetInt("service.get_limit_default"),
+	}
+}
+
+func cacheConfig() Cache {
+	return Cache{
+		Capacity:    viper.GetInt("cache.capacity"),
+		MaxMessages: viper.GetInt("cache.max_messages"),
+	}
+}
+
+func storageConfig() Storage {
+	return Storage{
+		Dialect:         viper.GetString("database.goose_dialect"),
+		MigrationsDir:   viper.GetString("database.goose_migrations_directory"),
+		Host:            viper.GetString("database.host"),
+		Port:            viper.GetString("database.port"),
+		DBName:          viper.GetString("database.dbname"),
+		SSLMode:         viper.GetString("database.sslmode"),
+		MaxOpenConns:    viper.GetInt("database.max_open_conns"),
+		MaxIdleConns:    viper.GetInt("database.max_idle_conns"),
+		ConnMaxLifetime: viper.GetDuration("database.conn_max_lifetime"),
+		RecoverLimit:    viper.GetInt("database.recover_limit"),
+	}
+}
+
+func loadEnvs(conf *Config) {
 	conf.Storage.Username = os.Getenv("DB_USER")
 	conf.Storage.Password = os.Getenv("DB_PASSWORD")
-
-	//conf.Cache.Password = os.Getenv("REDIS_PASSWORD")
-
 }

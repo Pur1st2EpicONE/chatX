@@ -29,3 +29,7 @@ func (s *Storage) Close() {
 		}
 	}
 }
+
+func (s *Storage) GetDB() *gorm.DB {
+	return s.db
+}
