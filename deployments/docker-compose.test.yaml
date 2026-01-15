@@ -1,0 +1,39 @@
+services:
+  app-test:
+    image: golang:1.25-alpine
+    working_dir: /app
+    container_name: chatX-test
+    volumes:
+      - ./:/app
+      - ./migrations:/app/migrations:ro
+      - ./config.yaml:/app/config.yaml:ro
+    environment:
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: chatX_test
+      DB_HOST: postgres-test 
+      DB_PORT: 5432
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+    command: sh -c "\
+      go test ./internal/handler/v1 -cover && \
+      go test ./internal/service/impl -cover && \
+      go test ./internal/cache/memory -cover && \
+      go test ./internal/repository/postgres -cover"
+
+  postgres-test:
+    image: postgres:latest
+    container_name: postgres-test
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: chatX_test  
+    ports:
+      - 5433:5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d chatX_test"] 
+      interval: 5s
+      timeout: 5s
+      retries: 30 # high value for VM compatibility
+    restart: on-failure

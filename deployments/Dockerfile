@@ -10,15 +10,15 @@ RUN go mod download
 COPY . .
 
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
-    go build -o chronos ./cmd/chronos
+    go build -o chatX ./cmd/chatx
 
 FROM scratch
 
 WORKDIR /app
 
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-COPY --from=builder /app/chronos /app/chronos
+COPY --from=builder /app/chatX /app/chatX
 
-EXPOSE 8080
+EXPOSE 8081
 
-ENTRYPOINT ["/app/chronos"]
+ENTRYPOINT ["/app/chatX"]

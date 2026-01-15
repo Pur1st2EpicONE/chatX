@@ -43,42 +43,25 @@ migrate-down:
 	migrate -path ./migrations -database "postgres://${DB_USER}:${DB_PASSWORD}@localhost:5433/chronos-db?sslmode=disable" down
 
 test:
-	cat .env.example > .env
-	cp ./configs/config.dev.yaml ./config.yaml
-	cp ./deployments/docker-compose.dev.yaml ./docker-compose.yaml
-	docker compose -f docker-compose.yaml up -d postgres-test > /dev/null 2>&1
-	until docker exec postgres-test pg_isready -U ${DB_USER} > /dev/null 2>&1; do sleep 0.5; done
-	go test ./internal/handler/v1 -cover
-	go test ./internal/service/impl -cover
-	go test ./internal/cache/memory -cover
-	go test ./internal/repository/postgres -cover
-	docker compose -f docker-compose.yaml stop postgres-test > /dev/null 2>&1
-	docker compose -f docker-compose.yaml rm -f postgres-test > /dev/null 2>&1
+	if [ ! -f .env ]; then cat .env.example > .env; fi 
+	if [ ! -f config.yaml ]; then cp ./configs/config.test.yaml ./config.yaml; fi 
+	if [ ! -f docker-compose.yaml ]; then cp ./deployments/docker-compose.test.yaml ./docker-compose.yaml; fi
+	docker compose -f docker-compose.yaml up -d postgres-test
+	until docker exec postgres-test pg_isready -U ${DB_USER} -d postgres-test > /dev/null 2>&1; do sleep 0.5; done
+	echo "Running tests, please be patient (≈2 min)"
+	docker compose -f docker-compose.yaml run --rm app-test > .temp 2>/dev/null
+	cat .temp; rm -f .temp
+	docker compose -f docker-compose.yaml down -v > /dev/null 2>&1
 	rm -f docker-compose.yaml config.yaml .env
 
 postgres:
 	docker compose exec postgres psql -U ${DB_USER} -d chronos-db
-
-rabbit:
-	docker compose exec rabbitmq bash
-
-redis:
-	docker compose exec redis redis-cli
 
 app_logs:
 	docker compose logs --tail 5 app
 
 postgres_logs:
 	docker compose logs --tail 5 postgres
-
-rabbit_logs:
-	docker compose logs --tail 5 rabbitmq
-
-redis_logs:
-	docker compose logs --tail 5 redis
-
-queues:
-	docker compose exec rabbitmq rabbitmqctl list_queues
 
 lint:
 	golangci-lint run ./...
@@ -96,13 +79,8 @@ help:
 	@echo "| migrate-down   | Rollback all database migrations                                  |"
 	@echo "| test           | Run unit and integration tests                                    |"
 	@echo "| postgres       | Open psql shell inside postgres container                         |"
-	@echo "| rabbit         | Open shell inside rabbitmq container                              |"
-	@echo "| redis          | Open redis-cli inside redis container                             |"
 	@echo "| app_logs       | Show last 5 lines of app logs                                     |"
 	@echo "| postgres_logs  | Show last 5 lines of postgres logs                                |"
-	@echo "| rabbit_logs    | Show last 5 lines of rabbitmq logs                                |"
-	@echo "| redis_logs     | Show last 5 lines of redis logs                                   |"
-	@echo "| queues         | List queues in rabbitmq                                           |"
 	@echo "| lint           | Run golangci-lint                                                 |"
 	@echo " ———————————————————————————————————————————————————————————————————————————————————— "
 

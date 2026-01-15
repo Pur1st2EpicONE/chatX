@@ -32,8 +32,8 @@ func TestMain(m *testing.M) {
 	}
 
 	cfg := config.Storage{
-		Host:     "localhost",
-		Port:     "5434",
+		Host:     "postgres-test",
+		Port:     "5432",
 		Username: os.Getenv("DB_USER"),
 		Password: os.Getenv("DB_PASSWORD"),
 		DBName:   "chatX_test",

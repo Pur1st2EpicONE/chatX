@@ -67,7 +67,7 @@ func Load() (Config, error) {
 		return Config{}, fmt.Errorf("viper: %v", err)
 	}
 
-	if err := godotenv.Load(".env"); err != nil {
+	if err := godotenv.Load(".env"); err != nil && !viper.GetBool("docker") {
 		return Config{}, fmt.Errorf("godotenv: %v", err)
 	}
 
