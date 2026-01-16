@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: ["main", "master"]
+  pull_request:
+    branches: ["main", "master"]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go (for golangci-lint)
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25.1'
+
+      - name: Install golangci-lint
+        run: |
+          go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+
+      - name: Run golangci-lint
+        run: golangci-lint run ./...
+
+      - name: Prepare test environment
+        run: |
+          cp .env.example .env
+          cp ./configs/config.test.yaml ./config.yaml
+          cp ./deployments/docker-compose.test.yaml ./docker-compose.yaml
+
+      - name: Run tests in Docker
+        env:
+          DB_USER: ci_user
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        run: |
+          docker compose up -d postgres-test
+          until docker exec postgres-test pg_isready -U $DB_USER -d chatX_test > /dev/null 2>&1; do
+            sleep 0.5
+          done
+          docker compose run --rm app-test
+
+      - name: Cleanup
+        if: always()
+        run: |
+          docker compose down -v

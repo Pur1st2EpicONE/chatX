@@ -1,4 +1,4 @@
-.PHONY: all up down reset local migrate-up migrate-down test postgres rabbit redis app_logs postgres_logs rabbit_logs redis_logs queues lint .env .env.example help
+.PHONY: all up down reset local test postgres app_logs postgres_logs lint .env .env.example help
 .POSIX:
 .SILENT:
 
@@ -15,7 +15,7 @@ up:
 	if [ ! -f config.yaml ]; then cp ./configs/config.full.yaml ./config.yaml; fi
 	if [ ! -f docker-compose.yaml ]; then cp ./deployments/docker-compose.full.yaml ./docker-compose.yaml; fi
 	if [ ! -f Dockerfile ]; then cp ./deployments/Dockerfile ./Dockerfile; fi
-	docker compose up -d postgres rabbitmq redis app
+	docker compose up -d postgres app
 	rm -f Dockerfile
 
 down:
@@ -23,24 +23,15 @@ down:
 	rm -f Dockerfile docker-compose.yaml config.yaml
 
 reset:
-	docker volume rm chronos_postgres_data
+	docker volume rm chatx_postgres_data
 
 local:
 	if [ ! -f .env ]; then cat .env.example > .env; fi 
 	if [ ! -f config.yaml ]; then cp ./configs/config.dev.yaml ./config.yaml; fi 
 	if [ ! -f docker-compose.yaml ]; then cp ./deployments/docker-compose.dev.yaml ./docker-compose.yaml; fi
-	docker compose up -d postgres
+	docker compose up -d
 	until docker exec postgres pg_isready -U ${DB_USER} > /dev/null 2>&1; do sleep 0.5; done
 	bash -c 'trap "exit 0" INT; go run ./cmd/chatx/main.go'
-
-migrate-up:
-	for i in $$(seq 1 10); do \
-		migrate -path ./migrations -database "postgres://${DB_USER}:${DB_PASSWORD}@localhost:5433/chronos-db?sslmode=disable" up && exit 0; \
-		echo "Retry $$i/10..."; sleep 1; \
-	done; exit 1
-
-migrate-down:
-	migrate -path ./migrations -database "postgres://${DB_USER}:${DB_PASSWORD}@localhost:5433/chronos-db?sslmode=disable" down
 
 test:
 	if [ ! -f .env ]; then cat .env.example > .env; fi 
@@ -55,7 +46,7 @@ test:
 	rm -f docker-compose.yaml config.yaml .env
 
 postgres:
-	docker compose exec postgres psql -U ${DB_USER} -d chronos-db
+	docker compose exec postgres psql -U ${DB_USER} -d chatX-db
 
 app_logs:
 	docker compose logs --tail 5 app
@@ -71,12 +62,10 @@ lint:
 
 help:
 	@echo " ———————————————————————————————————————————————————————————————————————————————————— "
-	@echo "| up             | Start all services (postgres, rabbitmq, redis, app) in background |"
+	@echo "| up             | Start all services (postgres, app) in background                  |"
 	@echo "| down           | Stop and remove all containers, networks, and temporary files     |"
 	@echo "| reset          | Remove postgres Docker volume                                     |"
 	@echo "| local          | Start local dev environment (go 1.25.1 required)                  |"
-	@echo "| migrate-up     | Apply all database migrations                                     |"
-	@echo "| migrate-down   | Rollback all database migrations                                  |"
 	@echo "| test           | Run unit and integration tests                                    |"
 	@echo "| postgres       | Open psql shell inside postgres container                         |"
 	@echo "| app_logs       | Show last 5 lines of app logs                                     |"

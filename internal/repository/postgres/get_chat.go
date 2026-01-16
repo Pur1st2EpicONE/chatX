@@ -9,6 +9,8 @@ import (
 	"gorm.io/gorm"
 )
 
+const order = "created_at DESC"
+
 func (s *Storage) GetChat(ctx context.Context, chatID int, limit int) (models.Chat, error) {
 
 	var chat models.Chat
@@ -25,5 +27,5 @@ func (s *Storage) GetChat(ctx context.Context, chatID int, limit int) (models.Ch
 }
 
 func preload(limit int) func(*gorm.DB) *gorm.DB {
-	return func(db *gorm.DB) *gorm.DB { return db.Order("created_at DESC").Limit(limit) }
+	return func(db *gorm.DB) *gorm.DB { return db.Order(order).Limit(limit) }
 }
