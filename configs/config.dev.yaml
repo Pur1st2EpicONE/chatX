@@ -1,32 +1,33 @@
 # Logger configuration
 logger:
-  log_directory:                               # Directory where logs will be stored; if empty, logs are written to stdout
-  debug_mode: true                             # Enable debug-level logging
-  request_logging: false
+  log_directory:                                  # Directory where logs will be stored; if empty, logs are written to stdout
+  debug_mode: true                                # Enable debug-level logging
+  request_logging: false                          # Enable logging for each HTTP request
 
 # HTTP server configuration
 server:
-  port: "8080"                                 # Port where the HTTP server listens
-  read_timeout: 5s                             # Maximum duration for reading the entire request
-  write_timeout: 10s                           # Maximum duration before timing out response writes
-  max_header_bytes: 1048576                    # Maximum size of request headers in bytes
-  shutdown_timeout: 10s                        # Timeout for graceful server shutdown
+  port: "8080"                                    # Port where the HTTP server listens
+  read_timeout: 5s                                # Maximum duration for reading the entire request
+  write_timeout: 10s                              # Maximum duration before timing out response writes
+  max_header_bytes: 1048576                       # Maximum size of request headers in bytes
+  shutdown_timeout: 10s                           # Timeout for graceful server shutdown
 
+# Service limits
 service:
-  max_message_length: 5000
-  max_title_length: 200
-  get_limit_max: 100
-  get_limit_default: 20
+  max_message_length: 5000                        # Maximum allowed length of message text
+  max_title_length: 200                           # Maximum allowed length of chat title
+  get_limit_max: 100                              # Maximum number of messages returned
+  get_limit_default: 20                           # Default number of messages if limit not specified
 
-# Cache (Redis) configuration
+# Cache configuration
 cache:
-  capacity: 3
-  max_messages: 2
+  capacity: 5                                     # Maximum number of chats stored in cache
+  max_messages: 5                                 # Maximum number of messages stored per chat in cache
 
 # Database (PostgreSQL) configuration
 database:
-  goose_dialect: "postgres"
-  goose_migrations_directory: "./migrations"
+  goose_dialect: "postgres"                    # Dialect used by goose migrations
+  goose_migrations_directory: "./migrations"   # Directory containing migration files
   host: localhost                              # Database host
   port: "5433"                                 # Database port
   dbname: chronos-db                           # Database name
@@ -34,4 +35,3 @@ database:
   max_open_conns: 20                           # Maximum number of open database connections
   max_idle_conns: 10                           # Maximum number of idle connections
   conn_max_lifetime: 30m                       # Maximum lifetime of a database connection
-  recover_limit: 1000                          # Max number of notifications to recover and re-queue after DB/broker outage

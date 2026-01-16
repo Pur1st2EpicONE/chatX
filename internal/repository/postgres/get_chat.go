@@ -9,8 +9,9 @@ import (
 	"gorm.io/gorm"
 )
 
-const order = "created_at DESC"
+const order = "created_at DESC" // order defines the default sorting order for messages: newest first.
 
+// GetChat retrieves a chat and its messages from the database.
 func (s *Storage) GetChat(ctx context.Context, chatID int, limit int) (models.Chat, error) {
 
 	var chat models.Chat
@@ -26,6 +27,8 @@ func (s *Storage) GetChat(ctx context.Context, chatID int, limit int) (models.Ch
 
 }
 
+// preload returns a GORM query modifier to preload messages with a given limit
+// and ordered by created_at descending.
 func preload(limit int) func(*gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB { return db.Order(order).Limit(limit) }
 }

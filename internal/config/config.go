@@ -1,3 +1,6 @@
+// Package config provides configuration loading and parsing
+// from environment variables, .env files, and YAML/JSON configs
+// using Viper and godotenv.
 package config
 
 import (
@@ -9,55 +12,62 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Config aggregates all application configurations.
 type Config struct {
-	Logger  Logger  `mapstructure:"logger"`
-	Server  Server  `mapstructure:"server"`
-	Service Service `mapstructure:"service"`
-	Cache   Cache   `mapstructure:"cache"`
-	Storage Storage `mapstructure:"database"`
+	Logger  Logger  `mapstructure:"logger"`   // Logger configuration
+	Server  Server  `mapstructure:"server"`   // HTTP server configuration
+	Service Service `mapstructure:"service"`  // Application service limits
+	Cache   Cache   `mapstructure:"cache"`    // In-memory cache configuration
+	Storage Storage `mapstructure:"database"` // Database configuration
 }
 
+// Logger contains settings for logging behavior.
 type Logger struct {
-	Debug          bool   `mapstructure:"debug_mode"`
-	LogDir         string `mapstructure:"log_directory"`
-	RequestLogging bool   `mapstructure:"request_logging"`
+	Debug          bool   `mapstructure:"debug_mode"`      // Enable debug logging
+	LogDir         string `mapstructure:"log_directory"`   // Directory to write logs
+	RequestLogging bool   `mapstructure:"request_logging"` // Enable per-request logging
 }
 
+// Server contains HTTP server settings.
 type Server struct {
-	Port            string        `mapstructure:"port"`
-	ReadTimeout     time.Duration `mapstructure:"read_timeout"`
-	WriteTimeout    time.Duration `mapstructure:"write_timeout"`
-	MaxHeaderBytes  int           `mapstructure:"max_header_bytes"`
-	ShutdownTimeout time.Duration `mapstructure:"shutdown_timeout"`
+	Port            string        `mapstructure:"port"`             // Listening port
+	ReadTimeout     time.Duration `mapstructure:"read_timeout"`     // Maximum read timeout
+	WriteTimeout    time.Duration `mapstructure:"write_timeout"`    // Maximum write timeout
+	MaxHeaderBytes  int           `mapstructure:"max_header_bytes"` // Maximum size of request headers
+	ShutdownTimeout time.Duration `mapstructure:"shutdown_timeout"` // Graceful shutdown timeout
 }
 
+// Service contains business logic constraints.
 type Service struct {
-	MaxMessageLength int `mapstructure:"max_message_length"`
-	MaxTitleLength   int `mapstructure:"max_title_length"`
-	GetLimitMax      int `mapstructure:"get_limit_max"`
-	GetLimitDefault  int `mapstructure:"get_limit_default"`
+	MaxMessageLength int `mapstructure:"max_message_length"` // Max length of a message
+	MaxTitleLength   int `mapstructure:"max_title_length"`   // Max length of a title
+	GetLimitMax      int `mapstructure:"get_limit_max"`      // Maximum GET limit
+	GetLimitDefault  int `mapstructure:"get_limit_default"`  // Default GET limit
 }
 
+// Storage contains database connection settings.
 type Storage struct {
-	Dialect         string        `mapstructure:"goose_dialect"`
-	MigrationsDir   string        `mapstructure:"goose_migrations_directory"`
-	Host            string        `mapstructure:"host"`
-	Port            string        `mapstructure:"port"`
-	Username        string        `mapstructure:"username"`
-	Password        string        `mapstructure:"password"`
-	DBName          string        `mapstructure:"dbname"`
-	SSLMode         string        `mapstructure:"sslmode"`
-	MaxOpenConns    int           `mapstructure:"max_open_conns"`
-	MaxIdleConns    int           `mapstructure:"max_idle_conns"`
-	ConnMaxLifetime time.Duration `mapstructure:"conn_max_lifetime"`
-	RecoverLimit    int           `mapstructure:"recover_limit"`
+	Dialect         string        `mapstructure:"goose_dialect"`              // Goose migration dialect
+	MigrationsDir   string        `mapstructure:"goose_migrations_directory"` // Directory for Goose migrations
+	Host            string        `mapstructure:"host"`                       // Database host
+	Port            string        `mapstructure:"port"`                       // Database port
+	Username        string        `mapstructure:"username"`                   // Database username
+	Password        string        `mapstructure:"password"`                   // Database password
+	DBName          string        `mapstructure:"dbname"`                     // Database name
+	SSLMode         string        `mapstructure:"sslmode"`                    // SSL mode
+	MaxOpenConns    int           `mapstructure:"max_open_conns"`             // Maximum open connections
+	MaxIdleConns    int           `mapstructure:"max_idle_conns"`             // Maximum idle connections
+	ConnMaxLifetime time.Duration `mapstructure:"conn_max_lifetime"`          // Connection max lifetime
 }
 
+// Cache contains in-memory caching settings.
 type Cache struct {
-	Capacity    int `mapstructure:"capacity"`
-	MaxMessages int `mapstructure:"max_messages"`
+	Capacity    int `mapstructure:"capacity"`     // Maximum number of chats to cache
+	MaxMessages int `mapstructure:"max_messages"` // Maximum messages per cached chat
 }
 
+// Load reads configuration from Viper, .env, and environment variables.
+// Returns a fully populated Config instance or an error.
 func Load() (Config, error) {
 
 	viper.AddConfigPath(".")
@@ -85,6 +95,7 @@ func Load() (Config, error) {
 
 }
 
+// loggerConfig loads logger configuration from Viper.
 func loggerConfig() Logger {
 	return Logger{
 		Debug:          viper.GetBool("logger.debug_mode"),
@@ -93,6 +104,7 @@ func loggerConfig() Logger {
 	}
 }
 
+// serverConfig loads server configuration from Viper.
 func serverConfig() Server {
 	return Server{
 		Port:            viper.GetString("server.port"),
@@ -103,6 +115,7 @@ func serverConfig() Server {
 	}
 }
 
+// serviceConfig loads service constraints from Viper.
 func serviceConfig() Service {
 	return Service{
 		MaxMessageLength: viper.GetInt("service.max_message_length"),
@@ -112,6 +125,7 @@ func serviceConfig() Service {
 	}
 }
 
+// cacheConfig loads cache configuration from Viper.
 func cacheConfig() Cache {
 	return Cache{
 		Capacity:    viper.GetInt("cache.capacity"),
@@ -119,6 +133,7 @@ func cacheConfig() Cache {
 	}
 }
 
+// storageConfig loads database configuration from Viper.
 func storageConfig() Storage {
 	return Storage{
 		Dialect:         viper.GetString("database.goose_dialect"),
@@ -130,10 +145,10 @@ func storageConfig() Storage {
 		MaxOpenConns:    viper.GetInt("database.max_open_conns"),
 		MaxIdleConns:    viper.GetInt("database.max_idle_conns"),
 		ConnMaxLifetime: viper.GetDuration("database.conn_max_lifetime"),
-		RecoverLimit:    viper.GetInt("database.recover_limit"),
 	}
 }
 
+// loadEnvs overrides specific configuration fields with environment variables.
 func loadEnvs(conf *Config) {
 	conf.Storage.Username = os.Getenv("DB_USER")
 	conf.Storage.Password = os.Getenv("DB_PASSWORD")

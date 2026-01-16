@@ -7,6 +7,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// CreateChat handles POST /chats requests.
+//
+// Expects JSON body with ChatRequestDTO. Returns the created chat as ChatResponseDTO.
+// Responds with ErrInvalidJSON if JSON parsing fails.
 func (h *Handler) CreateChat(c *gin.Context) {
 
 	var dto ChatRequestDTO

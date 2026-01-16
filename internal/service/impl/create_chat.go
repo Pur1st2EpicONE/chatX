@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// CreateChat creates a new chat in the system.
 func (s *Service) CreateChat(ctx context.Context, chat models.Chat) (models.Chat, error) {
 
 	if err := s.validateChat(&chat); err != nil {
@@ -23,6 +24,7 @@ func (s *Service) CreateChat(ctx context.Context, chat models.Chat) (models.Chat
 
 }
 
+// initChat initializes fields for a new chat.
 func initChat(chat *models.Chat) {
 	chat.CreatedAt = time.Now().UTC()
 }

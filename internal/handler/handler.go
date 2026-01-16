@@ -1,6 +1,9 @@
+// Package handler provides HTTP handlers and routing for the application.
+// It sets up API routes, request logging, and Swagger documentation.
 package handler
 
 import (
+	_ "chatX/docs"
 	v1 "chatX/internal/handler/v1"
 	"chatX/internal/logger"
 	"chatX/internal/service"
@@ -9,8 +12,20 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
+// NewHandler creates a new HTTP handler with Gin,
+// registers API routes for version 1 of the chat API,
+// and sets up Swagger documentation.
+//
+// Parameters:
+//   - logger: application logger instance
+//   - requestLogging: enable detailed request logging if true
+//   - service: business logic service layer
+//
+// Returns an http.Handler ready to be served.
 func NewHandler(logger logger.Logger, requestLogging bool, service service.Service) http.Handler {
 
 	handler := gin.New()
@@ -29,10 +44,17 @@ func NewHandler(logger logger.Logger, requestLogging bool, service service.Servi
 	apiV1.GET("/:id", handlerV1.GetChat)
 	apiV1.DELETE("/:id", handlerV1.DeleteChat)
 
+	handler.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
 	return handler
 
 }
 
+// middleware returns a Gin middleware that logs requests and response metadata.
+//
+// Logs include HTTP method, path, query parameters, latency, status code,
+// client IP, protocol, user agent, and Gin errors. Logs are categorized as
+// Info, Warn, or Error depending on the response status.
 func middleware(logger logger.Logger) gin.HandlerFunc {
 
 	return func(c *gin.Context) {

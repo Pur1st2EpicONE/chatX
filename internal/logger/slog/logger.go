@@ -1,3 +1,5 @@
+// Package slog provides a structured JSON logger that implements the Logger interface.
+// It wraps Go's slog.Logger and supports log levels, file output, and structured key-value logging.
 package slog
 
 import (

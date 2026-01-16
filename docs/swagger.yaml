@@ -1,0 +1,262 @@
+basePath: /api/v1
+definitions:
+  v1.ChatNotFoundErrorResponse:
+    properties:
+      error:
+        example: chat not found
+        type: string
+    type: object
+  v1.ChatRequestDTO:
+    properties:
+      title:
+        example: The best chat ever!!!
+        type: string
+    type: object
+  v1.ChatResponseDTO:
+    properties:
+      created_at:
+        example: "2025-01-16T12:00:00Z"
+        type: string
+      id:
+        example: 1
+        type: integer
+      title:
+        example: The best chat ever!!!
+        type: string
+    type: object
+  v1.ChatWithMessagesResponseDTO:
+    properties:
+      created_at:
+        example: "2025-01-16T12:00:00Z"
+        type: string
+      id:
+        example: 1
+        type: integer
+      messages:
+        items:
+          $ref: '#/definitions/v1.MessageResponseDTO'
+        type: array
+      title:
+        example: The best chat ever!!!
+        type: string
+    type: object
+  v1.InternalServerErrorResponse:
+    properties:
+      error:
+        example: internal server error
+        type: string
+    type: object
+  v1.InvalidChatIDErrorResponse:
+    properties:
+      error:
+        example: invalid chat ID; must be a positive integer
+        type: string
+    type: object
+  v1.InvalidJSONErrorResponse:
+    properties:
+      error:
+        example: invalid JSON format
+        type: string
+    type: object
+  v1.InvalidLimitErrorResponse:
+    properties:
+      error:
+        example: invalid limit; must be an integer
+        type: string
+    type: object
+  v1.MessageRequestDTO:
+    properties:
+      text:
+        example: Hello there!
+        type: string
+    type: object
+  v1.MessageResponseDTO:
+    properties:
+      chat_id:
+        example: 1
+        type: integer
+      created_at:
+        example: "2025-01-16T12:01:00Z"
+        type: string
+      id:
+        example: 10
+        type: integer
+      text:
+        example: Hi!
+        type: string
+    type: object
+  v1.OKResponse-string:
+    properties:
+      result:
+        type: string
+    type: object
+  v1.OKResponse-v1_ChatResponseDTO:
+    properties:
+      result:
+        $ref: '#/definitions/v1.ChatResponseDTO'
+    type: object
+  v1.OKResponse-v1_ChatWithMessagesResponseDTO:
+    properties:
+      result:
+        $ref: '#/definitions/v1.ChatWithMessagesResponseDTO'
+    type: object
+  v1.OKResponse-v1_MessageResponseDTO:
+    properties:
+      result:
+        $ref: '#/definitions/v1.MessageResponseDTO'
+    type: object
+  v1.ValidationErrorResponse:
+    properties:
+      error:
+        example: message text cannot be empty
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: REST API for chatX service
+  license:
+    name: MIT
+    url: https://github.com/Pur1st2EpicONE/chatX/blob/main/LICENSE
+  title: chatX API
+  version: "1.0"
+paths:
+  /chats:
+    post:
+      consumes:
+      - application/json
+      description: Create a new chat
+      parameters:
+      - description: Chat payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/v1.ChatRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.OKResponse-v1_ChatResponseDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.ValidationErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.InternalServerErrorResponse'
+      summary: Create chat
+      tags:
+      - chats
+  /chats/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete chat by ID
+      parameters:
+      - description: Chat ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.OKResponse-string'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.InvalidChatIDErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.ChatNotFoundErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.InternalServerErrorResponse'
+      summary: Delete chat
+      tags:
+      - chats
+    get:
+      consumes:
+      - application/json
+      description: Get chat with messages
+      parameters:
+      - description: Chat ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Messages limit
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.OKResponse-v1_ChatWithMessagesResponseDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.ValidationErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.ChatNotFoundErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.InternalServerErrorResponse'
+      summary: Get chat
+      tags:
+      - chats
+  /chats/{id}/messages:
+    post:
+      consumes:
+      - application/json
+      description: Create a new message in chat
+      parameters:
+      - description: Chat ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Message payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/v1.MessageRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.OKResponse-v1_MessageResponseDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.ValidationErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.ChatNotFoundErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.InternalServerErrorResponse'
+      summary: Create message
+      tags:
+      - messages
+swagger: "2.0"

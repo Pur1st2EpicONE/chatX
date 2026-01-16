@@ -7,6 +7,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// CreateMessage handles POST /chats/:id/messages requests.
+//
+// Expects JSON body with MessageRequestDTO. Returns the created message as MessageResponseDTO.
+// Responds with ErrInvalidJSON if JSON parsing fails or error if chat ID is invalid.
 func (h *Handler) CreateMessage(c *gin.Context) {
 
 	var dto MessageRequestDTO

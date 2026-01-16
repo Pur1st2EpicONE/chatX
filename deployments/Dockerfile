@@ -19,6 +19,6 @@ WORKDIR /app
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /app/chatX /app/chatX
 
-EXPOSE 8081
+EXPOSE 8080
 
 ENTRYPOINT ["/app/chatX"]

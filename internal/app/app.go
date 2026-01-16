@@ -1,3 +1,5 @@
+// Package app contains application bootstrap logic, dependency wiring,
+// lifecycle management, and graceful shutdown handling.
 package app
 
 import (
@@ -19,16 +21,20 @@ import (
 	"gorm.io/gorm"
 )
 
+// App represents the main application container.
+// It holds all core dependencies and controls the application lifecycle.
 type App struct {
-	logger  logger.Logger
-	logFile *os.File
-	server  server.Server
-	ctx     context.Context
-	cancel  context.CancelFunc
-	cache   cache.Cache
-	storage repository.Storage
+	logger  logger.Logger      // Application-wide logger
+	logFile *os.File           // Log file handler
+	server  server.Server      // HTTP server instance
+	ctx     context.Context    // Root application context
+	cancel  context.CancelFunc // Context cancellation function
+	cache   cache.Cache        // Cache layer implementation
+	storage repository.Storage // Persistent storage layer
 }
 
+// Boot initializes the application by loading configuration,
+// setting up logging, bootstrapping the database, and wiring dependencies.
 func Boot() *App {
 
 	config, err := config.Load()
@@ -47,6 +53,8 @@ func Boot() *App {
 
 }
 
+// bootstrapDB initializes the database connection,
+// applies migrations, and returns a configured gorm.DB instance.
 func bootstrapDB(logger logger.Logger, config config.Storage) (*gorm.DB, error) {
 
 	gormDB, err := repository.ConnectDB(config)
@@ -75,6 +83,8 @@ func bootstrapDB(logger logger.Logger, config config.Storage) (*gorm.DB, error) 
 
 }
 
+// wireApp constructs the App instance by wiring together
+// all infrastructure, domain services, handlers, and the server.
 func wireApp(db *gorm.DB, logger logger.Logger, logFile *os.File, config config.Config) *App {
 
 	ctx, cancel := newContext(logger)
@@ -96,6 +106,8 @@ func wireApp(db *gorm.DB, logger logger.Logger, logFile *os.File, config config.
 
 }
 
+// newContext creates a root application context that is cancelled
+// when an OS termination signal is received.
 func newContext(logger logger.Logger) (context.Context, context.CancelFunc) {
 
 	sigCh := make(chan os.Signal, 1)
@@ -116,6 +128,8 @@ func newContext(logger logger.Logger) (context.Context, context.CancelFunc) {
 
 }
 
+// Run starts the HTTP server and blocks until
+// the application context is cancelled.
 func (a *App) Run() {
 
 	go func() {
@@ -130,6 +144,7 @@ func (a *App) Run() {
 
 }
 
+// stop gracefully shuts down all application resources.
 func (a *App) stop() {
 
 	a.server.Shutdown()

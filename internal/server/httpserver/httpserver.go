@@ -1,3 +1,5 @@
+// Package httpserver provides the concrete implementation of the Server interface
+// using Go's standard net/http package with graceful shutdown support.
 package httpserver
 
 import (
@@ -9,12 +11,14 @@ import (
 	"time"
 )
 
+// HttpServer implements the Server interface using net/http.
 type HttpServer struct {
-	srv             *http.Server
-	shutdownTimeout time.Duration
-	logger          logger.Logger
+	srv             *http.Server  // underlying HTTP server
+	shutdownTimeout time.Duration // timeout for graceful shutdown
+	logger          logger.Logger // logger instance for structured logging
 }
 
+// NewServer creates and configures an HttpServer instance.
 func NewServer(logger logger.Logger, config config.Server, handler http.Handler) *HttpServer {
 
 	server := &HttpServer{
@@ -34,6 +38,7 @@ func NewServer(logger logger.Logger, config config.Server, handler http.Handler)
 
 }
 
+// Run starts the HTTP server and listens for incoming requests.
 func (s *HttpServer) Run() error {
 	s.logger.LogInfo("server — receiving requests", "layer", "server.httpserver")
 	if err := s.srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
@@ -42,6 +47,7 @@ func (s *HttpServer) Run() error {
 	return nil
 }
 
+// Shutdown gracefully stops the HTTP server, waiting up to shutdownTimeout
 func (s *HttpServer) Shutdown() {
 	ctx, cancel := context.WithTimeout(context.Background(), s.shutdownTimeout)
 	defer cancel()

@@ -1,3 +1,5 @@
+// Package memory provides in-memory cache implementations,
+// including an LRU cache for storing chats.
 package memory
 
 import (
@@ -8,26 +10,30 @@ import (
 	"sync"
 )
 
+// Node represents a doubly-linked list node for LRUCache.
 type Node struct {
-	Key  int
-	Val  models.Chat
-	Next *Node
-	Prev *Node
+	Key  int         // Cache key (chat ID)
+	Val  models.Chat // Cached chat
+	Next *Node       // Pointer to the next node
+	Prev *Node       // Pointer to the previous node
 }
 
+// newNode creates a new linked-list node for the given key and chat.
 func newNode(key int, value models.Chat) *Node {
 	return &Node{Key: key, Val: value}
 }
 
+// LRUCache is a thread-safe in-memory LRU cache for chats.
 type LRUCache struct {
-	mu     sync.RWMutex
-	head   *Node
-	tail   *Node
-	hm     map[int]*Node
-	config config.Cache
-	logger logger.Logger
+	mu     sync.RWMutex  // Mutex for concurrent access
+	head   *Node         // Dummy head node
+	tail   *Node         // Dummy tail node
+	hm     map[int]*Node // Map of keys to nodes
+	config config.Cache  // Cache configuration
+	logger logger.Logger // Logger instance
 }
 
+// NewLRUCache creates a new LRUCache instance with the given logger and config.
 func NewLRUCache(logger logger.Logger, config config.Cache) *LRUCache {
 	head := newNode(0, models.Chat{})
 	tail := newNode(0, models.Chat{})
@@ -42,6 +48,7 @@ func NewLRUCache(logger logger.Logger, config config.Cache) *LRUCache {
 	}
 }
 
+// remove deletes a node from the linked list and map.
 func (c *LRUCache) remove(node *Node) {
 	delete(c.hm, node.Key)
 	node.Next.Prev = node.Prev
@@ -49,6 +56,7 @@ func (c *LRUCache) remove(node *Node) {
 	node.Prev, node.Next = nil, nil
 }
 
+// insert adds a node to the front of the linked list and updates the map.
 func (c *LRUCache) insert(node *Node) {
 	c.hm[node.Key] = node
 	next := c.head.Next
@@ -58,6 +66,7 @@ func (c *LRUCache) insert(node *Node) {
 	next.Prev = node
 }
 
+// Get retrieves a chat from the cache by key and moves it to the front (most recently used).
 func (c *LRUCache) Get(key int) (models.Chat, error) {
 
 	if c.config.Capacity <= 0 {
@@ -79,6 +88,7 @@ func (c *LRUCache) Get(key int) (models.Chat, error) {
 
 }
 
+// Put stores a chat in the cache. Evicts least-recently-used chat if capacity is exceeded.
 func (c *LRUCache) Put(key int, value models.Chat) {
 
 	if c.config.Capacity <= 0 {
@@ -109,6 +119,7 @@ func (c *LRUCache) Put(key int, value models.Chat) {
 
 }
 
+// Delete removes a chat from the cache by key.
 func (c *LRUCache) Delete(key int) {
 
 	if c.config.Capacity <= 0 {
@@ -125,6 +136,7 @@ func (c *LRUCache) Delete(key int) {
 
 }
 
+// Close releases all resources used by the cache.
 func (c *LRUCache) Close() {
 
 	for k := range c.hm {

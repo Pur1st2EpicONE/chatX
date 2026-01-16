@@ -1,3 +1,5 @@
+// Package errs defines application-specific error values
+// for validation, cache, and internal server errors.
 package errs
 
 import "errors"

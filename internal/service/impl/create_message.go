@@ -11,6 +11,7 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
+// CreateMessage creates a new message associated with a chat.
 func (s *Service) CreateMessage(ctx context.Context, message models.Message) (models.Message, error) {
 
 	if err := s.validateMessage(&message); err != nil {
@@ -33,6 +34,7 @@ func (s *Service) CreateMessage(ctx context.Context, message models.Message) (mo
 
 }
 
+// initMessage initializes fields for a new message.
 func initMessage(message *models.Message) {
 	message.CreatedAt = time.Now().UTC()
 }

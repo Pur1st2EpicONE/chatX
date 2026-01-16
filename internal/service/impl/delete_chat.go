@@ -6,6 +6,7 @@ import (
 	"errors"
 )
 
+// DeleteChat deletes a chat and invalidates its cache entry.
 func (s *Service) DeleteChat(ctx context.Context, chatID int) error {
 	if err := s.storage.DeleteChat(ctx, chatID); err != nil {
 		if !errors.Is(err, errs.ErrChatNotFound) {

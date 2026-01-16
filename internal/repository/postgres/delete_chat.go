@@ -6,6 +6,7 @@ import (
 	"context"
 )
 
+// DeleteChat deletes a chat and its associated messages from the database by chat ID.
 func (s *Storage) DeleteChat(ctx context.Context, chatID int) error {
 
 	result := s.db.WithContext(ctx).Delete(&models.Chat{}, chatID)

@@ -1,3 +1,4 @@
+// Package postgres provides a PostgreSQL implementation of the Storage interface.
 package postgres
 
 import (
@@ -7,16 +8,20 @@ import (
 	"gorm.io/gorm"
 )
 
+// Storage implements the repository.Storage interface for PostgreSQL using GORM.
 type Storage struct {
-	db     *gorm.DB
-	logger logger.Logger
-	config config.Storage
+	db     *gorm.DB       // underlying GORM DB connection
+	logger logger.Logger  // logger instance for structured logging
+	config config.Storage // configuration for database connection
 }
 
+// NewStorage creates a new Postgres storage instance.
 func NewStorage(logger logger.Logger, config config.Storage, db *gorm.DB) *Storage {
 	return &Storage{db: db, logger: logger, config: config}
 }
 
+// Close closes the underlying SQL database connection.
+// Logs errors if the connection cannot be closed properly.
 func (s *Storage) Close() {
 	sqlDB, err := s.db.DB()
 	if err != nil {
@@ -28,8 +33,4 @@ func (s *Storage) Close() {
 			s.logger.LogInfo("postgres — database closed", "layer", "repository.postgres")
 		}
 	}
-}
-
-func (s *Storage) GetDB() *gorm.DB {
-	return s.db
 }

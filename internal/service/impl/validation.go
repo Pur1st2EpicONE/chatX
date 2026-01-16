@@ -8,6 +8,11 @@ import (
 	"unicode/utf8"
 )
 
+// validateChat checks whether the provided chat is valid.
+//
+// It trims whitespace from the chat title, counts its runes, and ensures that
+// the title is neither empty nor exceeds the maximum allowed length configured
+// in the service.
 func (s *Service) validateChat(chat *models.Chat) error {
 
 	chat.Title = strings.TrimSpace(chat.Title)
@@ -25,6 +30,11 @@ func (s *Service) validateChat(chat *models.Chat) error {
 
 }
 
+// validateMessage checks whether the provided message is valid.
+//
+// It trims whitespace from the message text, counts its runes, and ensures that
+// the text is neither empty nor exceeds the maximum allowed length configured
+// in the service.
 func (s *Service) validateMessage(message *models.Message) error {
 
 	message.Text = strings.TrimSpace(message.Text)
@@ -42,6 +52,10 @@ func (s *Service) validateMessage(message *models.Message) error {
 
 }
 
+// validateLimit parses and validates the limit string for retrieving messages.
+//
+// If the string is empty or "0", it returns the default limit. It ensures the
+// limit is a positive integer and does not exceed the configured maximum.
 func (s *Service) validateLimit(limitStr string) (int, error) {
 
 	if limitStr == "" || limitStr == "0" {
