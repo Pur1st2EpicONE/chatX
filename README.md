@@ -78,7 +78,7 @@ Service uses three configuration files, depending on the selected run mode:
 
 You may optionally review and adjust the corresponding configuration file to match your preferences. The default values are suitable for most use cases.
 
-### Environment variables and notification credentials
+### Environment variables
 
 Service uses a .env file for runtime configuration. You may create your own .env file manually before running the service, or edit [.env.example](.env.example) and let it be copied automatically on startup.
 If environment file does not exist, .env.example is copied to create it. If environment file already exists, it is used as-is and will not be overwritten.
@@ -116,6 +116,8 @@ make reset
 
 ## Request examples
 
+⚠️ Note: You can explore and interact with the API via Swagger UI at host:port/swagger/index.html
+
 ### Create chat
 
 ```bash
@@ -135,6 +137,8 @@ Response:
   }
 }
 ```
+
+<br>
 
 ### Create message
 
@@ -157,6 +161,8 @@ Response:
 }
 ```
 
+<br>
+
 ### Get chat
 
 ```bash
@@ -176,6 +182,8 @@ Response:
 }
 ```
 
+<br>
+
 ### Delete chat
 
 ```bash
@@ -187,5 +195,3 @@ Response:
 ```json
 { "result": "deleted" }
 ```
-
-<br>
