@@ -10,6 +10,7 @@
 - [Installation](#installation)  
 - [Configuration](#configuration)  
 - [Shutting down](#shutting-down)  
+- [Testing & Linting](#testing--linting)
 - [Request examples](#request-examples)  
 
 <br>
@@ -110,6 +111,17 @@ sudo rm -rf <log-folder>
 
 ```bash
 make reset
+```
+
+<br>
+
+## Testing & Linting
+
+Run tests and ensure code quality:
+
+```bash
+make test        # Unit and integration tests
+make lint        # Linting checks
 ```
 
 <br>
